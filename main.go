@@ -5,10 +5,19 @@ import (
 	"net/http"
 )
 
-// Define a home handler function which writes a byte slice containing
-// "Hello from Snippetbox" as the response body.
+// Handler for display home page
 func home(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Hello from Snippetbox"))
+	w.Write([]byte("Display the home page"))
+}
+
+// Handler for display a specific snippet
+func snippetView(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Display a specific snippet"))
+}
+
+// Handler for display a new snippet
+func snippetCreate(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Create a new snippet"))
 }
 
 func main() {
@@ -16,6 +25,8 @@ func main() {
 	// then register the home function as the handler for the "/" URL pattern.
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", home)
+	mux.HandleFunc("/snippet/view", snippetView)
+	mux.HandleFunc("/snippet/create", snippetCreate)
 
 	// Print a log a message to say that the server is starting
 	log.Print("starting server on :4000")
