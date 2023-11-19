@@ -7,6 +7,14 @@ import (
 
 // Handler for display home page
 func home(w http.ResponseWriter, r *http.Request) {
+	// Check if the current request URL pag exactly matches "/".
+	// If it does not, use the http.NotFound() function to sent a 404 response to the client.
+	// Importantly, we then return from the handler.
+	// If we do not return the handler would keep executing and also write the message.
+	if r.URL.Path != "/" {
+		http.NotFound(w, r)
+		return
+	}
 	w.Write([]byte("Display the home page"))
 }
 
