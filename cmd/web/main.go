@@ -8,13 +8,21 @@ import (
 	"os"
 
 	_ "github.com/go-sql-driver/mysql"
+
+	// Import the models package that we just created. You need to prefix this with
+	// whatever module path you set up back in chapter 02.01 (Project Setup and Creating
+	// a Module) so that the import statement looks like this:
+	// "{your-module-path}/internal/models". If you can't remember what module path you used,
+	// you can find it at the top of the go.mod file.
+	"snippetbox.pp.com/internal/models"
 )
 
 // Define an application struct to hold the application-wide dependencies
 // for the web application. For now we'll only include the structured logger,
 // but we'll add more to this as the build progresses.
 type application struct {
-	logger *slog.Logger
+	logger   *slog.Logger
+	snippets *models.SnippetModel
 }
 
 func main() {
@@ -25,28 +33,23 @@ func main() {
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
-	// To keep the main() function tidy I've put the code for creating a connection pool
-	// into the separate openDB() function below. We pass openDB() the DSN from the command-line flag.
 	db, err := openDB(*dsn)
 	if err != nil {
 		logger.Error(err.Error())
 		os.Exit(1)
 	}
 
-	// We also defer a call to db.Close(), so that the connection pool is closed
-	// before the main() function exists.
 	defer db.Close()
 
-	// Initialize a new instance of our application struct, containing the dependencies
-	// (for now, just the structured logger).
+	// Initialize a models.SnippetModel instance containing the connection pool
+	// and add it to the application dependencies.4.
 	app := &application{
-		logger: logger,
+		logger:   logger,
+		snippets: &models.SnippetModel{DB: db},
 	}
 
 	logger.Info("starting server", "addr", *addr)
 
-	// Call the new app.routes() method to get the servemux containing our routes,
-	// and pass that to the http.ListenAndServe()
 	err = http.ListenAndServe(*addr, app.routes())
 	logger.Error(err.Error())
 	os.Exit(1)
