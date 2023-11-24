@@ -1,10 +1,13 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
 	"text/template"
+
+	"snippetbox.pp.com/internal/models"
 )
 
 // Change the signature of the home handler so it is defined
@@ -41,7 +44,17 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 		app.notFound(w) // Use the notFound() helper.
 		return
 	}
-	fmt.Fprintf(w, "Display a specific snippet with ID %d...", id)
+
+	snippet, err := app.snippets.Get(id)
+	if err != nil {
+		if errors.Is(err, models.ErrNoRecord) {
+			app.notFound(w)
+		} else {
+			app.serverError(w, r, err)
+		}
+		return
+	}
+	fmt.Fprintf(w, "%+v", snippet)
 }
 
 // Change the signature of the snippetCreate handler so it is defined as a method
