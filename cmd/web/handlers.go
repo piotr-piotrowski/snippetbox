@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"text/template"
 
 	"snippetbox.pp.com/internal/models"
 )
@@ -18,22 +17,32 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	files := []string{
-		"./ui/html/base.tmpl",
-		"./ui/html/partials/nav.tmpl",
-		"./ui/html/pages/home.tmpl",
-	}
-
-	ts, err := template.ParseFiles(files...)
+	snippets, err := app.snippets.Lastest()
 	if err != nil {
-		app.serverError(w, r, err) // Use the serverError() helper.
+		app.serverError(w, r, err)
 		return
 	}
 
-	err = ts.ExecuteTemplate(w, "base", nil)
-	if err != nil {
-		app.serverError(w, r, err) // Use the serverError() helper.
+	for _, snippet := range snippets {
+		fmt.Fprintf(w, "%+v\n", snippet)
 	}
+
+	// files := []string{
+	// 	"./ui/html/base.tmpl",
+	// 	"./ui/html/partials/nav.tmpl",
+	// 	"./ui/html/pages/home.tmpl",
+	// }
+
+	// ts, err := template.ParseFiles(files...)
+	// if err != nil {
+	// 	app.serverError(w, r, err) // Use the serverError() helper.
+	// 	return
+	// }
+
+	// err = ts.ExecuteTemplate(w, "base", nil)
+	// if err != nil {
+	// 	app.serverError(w, r, err) // Use the serverError() helper.
+	// }
 }
 
 // Change the signature of the snippetView handler so it is defined as a method
