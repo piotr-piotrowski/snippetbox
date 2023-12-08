@@ -6,17 +6,13 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/julienschmidt/httprouter"
 	"snippetbox.pp.com/internal/models"
 )
 
 // Change the signature of the home handler so it is defined
 // as a method against *application.
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/" {
-		http.NotFound(w, r)
-		return
-	}
-
 	snippets, err := app.snippets.Lastest()
 	if err != nil {
 		app.serverError(w, r, err)
@@ -29,10 +25,10 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	app.render(w, r, http.StatusOK, "home.tmpl", data)
 }
 
-// Change the signature of the snippetView handler so it is defined as a method
-// against *application.
 func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(r.URL.Query().Get("id"))
+	params := httprouter.ParamsFromContext(r.Context())
+
+	id, err := strconv.Atoi(params.ByName("id"))
 	if err != nil || id < 1 {
 		app.notFound(w) // Use the notFound() helper.
 		return
@@ -54,15 +50,11 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 	app.render(w, r, http.StatusOK, "view.tmpl", data)
 }
 
-// Change the signature of the snippetCreate handler so it is defined as a method
-// against *application.
 func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		w.Header().Set("Allow", http.MethodPost)
-		app.clientError(w, http.StatusMethodNotAllowed) // Use the clientError() helper.
-		return
-	}
+	w.Write([]byte("Display the form for creating a new snippet..."))
+}
 
+func (app *application) snippetCreatePost(w http.ResponseWriter, r *http.Request) {
 	// Create some variables holding dummy data. We'll remove these later on during the buid.
 	title := "0 snail"
 	content := "0 snail\nClimb Mount Fuji,\nBut slowly, slowly!\n\n- Kobayashi Issa"
