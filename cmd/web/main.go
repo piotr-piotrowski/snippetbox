@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/go-playground/form/v4"
 	_ "github.com/go-sql-driver/mysql"
 
 	// Import the models package that we just created. You need to prefix this with
@@ -25,6 +26,7 @@ type application struct {
 	logger        *slog.Logger
 	snippets      *models.SnippetModel
 	templateCache map[string]*template.Template
+	formDecoder   *form.Decoder
 }
 
 func main() {
@@ -49,12 +51,16 @@ func main() {
 		os.Exit(1)
 	}
 
+	// Initialize a decoder instance...
+	formDecoder := form.NewDecoder()
+
 	// Initialize a models.SnippetModel instance containing the connection pool
 	// and add it to the application dependencies.4.
 	app := &application{
 		logger:        logger,
 		snippets:      &models.SnippetModel{DB: db},
 		templateCache: templateCache,
+		formDecoder:   formDecoder,
 	}
 
 	logger.Info("starting server", "addr", *addr)
