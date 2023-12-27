@@ -35,7 +35,6 @@ type application struct {
 
 func main() {
 	addr := flag.String("addr", ":4000", "HTTP network address")
-	// Define a new command-line flag for the MySQL DSN string.
 	dsn := flag.String("dsn", "web:pass@/snippetbox?parseTime=true", "MySQL data source name")
 	flag.Parse()
 
@@ -61,8 +60,6 @@ func main() {
 	sessionManager.Store = mysqlstore.New(db)
 	sessionManager.Lifetime = 12 * time.Hour
 
-	// Initialize a models.SnippetModel instance containing the connection pool
-	// and add it to the application dependencies.4.
 	app := &application{
 		logger:         logger,
 		snippets:       &models.SnippetModel{DB: db},
@@ -71,9 +68,13 @@ func main() {
 		sessionManager: sessionManager,
 	}
 
-	logger.Info("starting server", "addr", *addr)
+	srv := &http.Server{
+		Addr:    *addr,
+		Handler: app.routes(),
+	}
+	logger.Info("starting server", "addr", srv.Addr)
 
-	err = http.ListenAndServe(*addr, app.routes())
+	err = srv.ListenAndServe()
 	logger.Error(err.Error())
 	os.Exit(1)
 }
