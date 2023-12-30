@@ -21,7 +21,7 @@ type snippetCreateForm struct {
 // Change the signature of the home handler so it is defined
 // as a method against *application.
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
-	snippets, err := app.snippets.Lastest()
+	snippets, err := app.snippets.Latest()
 	if err != nil {
 		app.serverError(w, r, err)
 		return

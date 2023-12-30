@@ -6,6 +6,12 @@ import (
 	"time"
 )
 
+type SnippetModelInterface interface {
+	Insert(title string, content string, expires int) (int, error)
+	Get(id int) (Snippet, error)
+	Latest() ([]Snippet, error)
+}
+
 // Define a Snippet type to hold the data for an individual snippet.
 // Notice how the fields of the struct correspond to the fields
 // in our MySQL snippets table?
@@ -62,7 +68,7 @@ func (m *SnippetModel) Get(id int) (Snippet, error) {
 }
 
 // This will return the 10 most recently created snippets.
-func (m *SnippetModel) Lastest() ([]Snippet, error) {
+func (m *SnippetModel) Latest() ([]Snippet, error) {
 	rows, err := m.DB.Query(`SELECT id, title, content, created, expires FROM snippets 
 	WHERE expires > UTC_TIMESTAMP() ORDER BY id DESC LIMIT 10`)
 	if err != nil {
